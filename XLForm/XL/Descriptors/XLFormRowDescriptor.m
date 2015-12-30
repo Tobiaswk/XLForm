@@ -96,7 +96,10 @@
         [self addObserver:self forKeyPath:@"value" options:NSKeyValueObservingOptionOld | NSKeyValueObservingOptionNew context:0];
         [self addObserver:self forKeyPath:@"disablePredicateCache" options:NSKeyValueObservingOptionOld | NSKeyValueObservingOptionNew context:0];
         [self addObserver:self forKeyPath:@"hidePredicateCache" options:NSKeyValueObservingOptionOld | NSKeyValueObservingOptionNew context:0];
-        
+        if(rowType == XLFormRowDescriptorTypeDecimal) {
+            self.numberFormatter = [[NSNumberFormatter alloc] init];
+            [self.numberFormatter setNumberStyle: NSNumberFormatterDecimalStyle];
+        }
     }
     return self;
 }
@@ -161,8 +164,8 @@
 -(NSString*)editTextValue
 {
     if (self.value) {
-        if (self.valueFormatter) {
-            if (self.useValueFormatterDuringInput) {
+        if (self.numberFormatter) {
+            if (self.useNumberFormatterDuringInput) {
                 return [self displayTextValue];
             }else{
                 // have formatter, but we don't want to use it during editing
@@ -181,8 +184,8 @@
 -(NSString*)displayTextValue
 {
     if (self.value) {
-        if (self.valueFormatter) {
-            return [self.valueFormatter stringForObjectValue:self.value];
+        if (self.numberFormatter) {
+            return [self.numberFormatter stringFromNumber:self.value];
         }
         else{
             return [self.value displayText];

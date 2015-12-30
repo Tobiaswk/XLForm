@@ -265,9 +265,10 @@ NSString *const XLFormTextFieldLengthPercentage = @"textFieldLengthPercentage";
 {
     [self.formViewController beginEditing:self.rowDescriptor];
     [self.formViewController textFieldDidBeginEditing:textField];
-    // set the input to the raw value if we have a formatter and it shouldn't be used during input
-    if (self.rowDescriptor.valueFormatter) {
-        self.textField.text = [self.rowDescriptor editTextValue];
+
+    // Format Decimal based on locale
+    if(self.rowDescriptor.rowType == XLFormRowDescriptorTypeDecimal) {
+        self.textField.text = [self.rowDescriptor.numberFormatter stringFromNumber:self.rowDescriptor.value];
     }
 }
 
@@ -275,11 +276,6 @@ NSString *const XLFormTextFieldLengthPercentage = @"textFieldLengthPercentage";
 {
     // process text change before we stick a formatted value in the UITextField
     [self textFieldDidChange:textField];
-    
-    // losing input, replace the text field with the formatted value
-    if (self.rowDescriptor.valueFormatter) {
-        self.textField.text = [self.rowDescriptor.value displayText];
-    }
     
     [self.formViewController endEditing:self.rowDescriptor];
     [self.formViewController textFieldDidEndEditing:textField];
@@ -292,19 +288,12 @@ NSString *const XLFormTextFieldLengthPercentage = @"textFieldLengthPercentage";
     if([self.textField.text length] > 0) {
         BOOL didUseFormatter = NO;
         
-        if (self.rowDescriptor.valueFormatter && self.rowDescriptor.useValueFormatterDuringInput)
+        if (self.rowDescriptor.rowType == XLFormRowDescriptorTypeDecimal)
         {
-            // use generic getObjectValue:forString:errorDescription and stringForObjectValue
-            NSString *errorDescription = nil;
-            NSString *objectValue = nil;
-            
-            if ([ self.rowDescriptor.valueFormatter getObjectValue:&objectValue forString:textField.text errorDescription:&errorDescription]) {
-                NSString *formattedValue = [self.rowDescriptor.valueFormatter stringForObjectValue:objectValue];
-                
-                self.rowDescriptor.value = objectValue;
-                textField.text = formattedValue;
-                didUseFormatter = YES;
-            }
+            self.rowDescriptor.value = [self.rowDescriptor.numberFormatter numberFromString:textField.text];
+
+            didUseFormatter = YES;
+
         }
         
         // only do this conversion if we didn't use the formatter
