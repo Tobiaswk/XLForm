@@ -123,7 +123,7 @@
     NSDictionary * views = @{@"leftButton" : self.leftButton, @"rightLabel": self.rightLabel, @"separatorView": separatorView, @"constraintTextField": _constraintTextField };
     [self.contentView addConstraint:[NSLayoutConstraint constraintWithItem:self.leftButton attribute:NSLayoutAttributeCenterY relatedBy:NSLayoutRelationEqual toItem:self.contentView attribute:NSLayoutAttributeCenterY multiplier:1.0f constant:0.0f]];
     [self.contentView addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"H:|[constraintTextField]" options:0 metrics:nil views:views]];
-    [self.contentView addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"H:|-16-[leftButton]-[separatorView(1)]-[rightLabel]-14-|" options:NSLayoutFormatAlignAllCenterY metrics:nil views:views]];
+    [self.contentView addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"H:|-[leftButton]-[separatorView(1)]-[rightLabel]-|" options:NSLayoutFormatAlignAllCenterY metrics:nil views:views]];
     [self.contentView addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"V:[separatorView(20)]" options:0 metrics:nil views:views]];
     [self.contentView addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"V:|-12-[constraintTextField]-12-|" options:0 metrics:0 views:views]];
 }
@@ -176,6 +176,19 @@
     return option.httpParameterKey;
 }
 
+- (id) chooseNewRightValueFromOption:(XLFormLeftRightSelectorOption*)option
+{
+    switch (option.leftValueChangePolicy) {
+        case XLFormLeftRightSelectorOptionLeftValueChangePolicyChooseLastOption:
+            return [option.rightOptions lastObject];
+        case XLFormLeftRightSelectorOptionLeftValueChangePolicyChooseFirstOption:
+            return [option.rightOptions firstObject];
+        case XLFormLeftRightSelectorOptionLeftValueChangePolicyNullifyRightValue:
+            return nil;
+    }
+    return nil;
+}
+
 
 #pragma mark - Actions
 
@@ -199,7 +212,7 @@
         UIAlertController * alertController = [UIAlertController alertControllerWithTitle:self.rowDescriptor.selectorTitle
                                                                                   message:nil
                                                                            preferredStyle:UIAlertControllerStyleActionSheet];
-        [alertController addAction:[UIAlertAction actionWithTitle:@"Cancel"
+        [alertController addAction:[UIAlertAction actionWithTitle:NSLocalizedString(@"Cancel", nil)
                                                             style:UIAlertActionStyleCancel
                                                           handler:nil]];
         __weak __typeof(self)weakSelf = self;
@@ -207,7 +220,7 @@
             [alertController addAction:[UIAlertAction actionWithTitle:[leftOption.leftValue displayText]
                                                                 style:UIAlertActionStyleDefault
                                                               handler:^(UIAlertAction *action) {
-                                                                  weakSelf.rowDescriptor.value = nil;
+                                                                  weakSelf.rowDescriptor.value = [self chooseNewRightValueFromOption:leftOption];
                                                                   weakSelf.rowDescriptor.leftRightSelectorLeftOptionSelected = [self leftOptionForDescription:[leftOption.leftValue displayText]].leftValue;
                                                                   [weakSelf.formViewController updateFormRow:weakSelf.rowDescriptor];
                                                               }]];
@@ -215,6 +228,7 @@
         
         [self.formViewController presentViewController:alertController animated:YES completion:nil];
     }
+#ifndef XL_APP_EXTENSIONS
     else{
         UIActionSheet * actionSheet = [[UIActionSheet alloc] initWithTitle:self.rowDescriptor.selectorTitle
                                                                   delegate:self cancelButtonTitle:nil
@@ -231,6 +245,7 @@
         
     }
 #endif
+#endif
 }
 
 #if __IPHONE_OS_VERSION_MIN_REQUIRED < 80000
@@ -242,7 +257,7 @@
     if ([actionSheet cancelButtonIndex] != buttonIndex){
         NSString * title = [actionSheet buttonTitleAtIndex:buttonIndex];
         if (![self.rowDescriptor.leftRightSelectorLeftOptionSelected isEqual:[self leftOptionForDescription:title].leftValue]){            
-            self.rowDescriptor.value = nil;
+            self.rowDescriptor.value = [self chooseNewRightValueFromOption:[self leftOptionForDescription:title]];
             self.rowDescriptor.leftRightSelectorLeftOptionSelected = [self leftOptionForDescription:title].leftValue;
             [self.formViewController updateFormRow:self.rowDescriptor];
         }

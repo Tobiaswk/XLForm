@@ -25,17 +25,15 @@
 
 
 class MultivaluedFormViewController : XLFormViewController {
-
     
-    required init(coder aDecoder: NSCoder) {
+    required init?(coder aDecoder: NSCoder) {
         super.init(coder: aDecoder)
-        self.initializeForm()
+        initializeForm()
     }
     
-    
-    override init(nibName nibNameOrNil: String?, bundle nibBundleOrNil: NSBundle?) {
+    override init(nibName nibNameOrNil: String?, bundle nibBundleOrNil: Bundle?) {
         super.init(nibName: nibNameOrNil, bundle: nibBundleOrNil)
-        self.initializeForm()
+        initializeForm()
     }
 
     func initializeForm() {
@@ -47,7 +45,7 @@ class MultivaluedFormViewController : XLFormViewController {
         form = XLFormDescriptor(title: "Multivalued Examples")
         
         // Multivalued section
-        section = XLFormSectionDescriptor.formSectionWithTitle("Multivalued TextField", sectionOptions:XLFormSectionOptions.CanReorder | XLFormSectionOptions.CanInsert | XLFormSectionOptions.CanDelete, sectionInsertMode:XLFormSectionInsertMode.Button)
+        section = XLFormSectionDescriptor.formSection(withTitle: "Multivalued TextField", sectionOptions:XLFormSectionOptions.canReorder.union(.canInsert).union(.canDelete), sectionInsertMode:.button)
         section.multivaluedAddButton!.title = "Add New Tag"
         section.footerTitle = "XLFormSectionInsertModeButton sectionType adds a 'Add Item' (Add New Tag) button row as last cell."
         // set up the row template
@@ -57,12 +55,8 @@ class MultivaluedFormViewController : XLFormViewController {
         
         form.addFormSection(section)
         
-        
-        
-        
-    
         // Another Multivalued section
-        section = XLFormSectionDescriptor.formSectionWithTitle("Multivalued ActionSheet Selector example", sectionOptions:XLFormSectionOptions.CanInsert | XLFormSectionOptions.CanDelete)
+        section = XLFormSectionDescriptor.formSection(withTitle: "Multivalued ActionSheet Selector example", sectionOptions:XLFormSectionOptions.canInsert.union(.canDelete))
         section.footerTitle = "XLFormSectionInsertModeLastRow sectionType adds a '+' icon inside last table view cell allowing us to add a new row."
         form.addFormSection(section)
         row = XLFormRowDescriptor(tag: nil, rowType: XLFormRowDescriptorTypeSelectorActionSheet, title: "Tap to select..")
@@ -71,7 +65,7 @@ class MultivaluedFormViewController : XLFormViewController {
     
     
         // Another one
-        section = XLFormSectionDescriptor.formSectionWithTitle("Multivalued Push Selector example", sectionOptions: XLFormSectionOptions.CanInsert | XLFormSectionOptions.CanDelete | XLFormSectionOptions.CanReorder, sectionInsertMode:XLFormSectionInsertMode.Button)
+        section = XLFormSectionDescriptor.formSection(withTitle: "Multivalued Push Selector example", sectionOptions: XLFormSectionOptions.canInsert.union(.canDelete).union(.canReorder), sectionInsertMode: .button)
         section.footerTitle = "MultivaluedFormViewController.swift"
         form.addFormSection(section)
         row = XLFormRowDescriptor(tag: nil, rowType: XLFormRowDescriptorTypeSelectorPush, title: "Tap to select )..")
@@ -84,40 +78,40 @@ class MultivaluedFormViewController : XLFormViewController {
 
     override func viewDidLoad() {
         super.viewDidLoad()
-        self.navigationItem.rightBarButtonItem = UIBarButtonItem(barButtonSystemItem: UIBarButtonSystemItem.Edit, target: self, action: "addDidTouch:")
+        navigationItem.rightBarButtonItem = UIBarButtonItem(barButtonSystemItem: .edit, target: self, action: #selector(MultivaluedFormViewController.addDidTouch(_:)))
     }
     
 //MARK: - Actions
     
-    func addDidTouch(sender: UIBarButtonItem) {
-        let actionSheet = UIActionSheet(title: nil, delegate: self, cancelButtonTitle: "Cancel", destructiveButtonTitle: "Remove Last Section", otherButtonTitles: "Add a section at the end", self.form!.disabled ? "Enable Form" : "Disable Form")
-        actionSheet.showInView(self.view)
+    func addDidTouch(_ sender: UIBarButtonItem) {
+        let actionSheet = UIActionSheet(title: nil, delegate: self, cancelButtonTitle: "Cancel", destructiveButtonTitle: "Remove Last Section", otherButtonTitles: "Add a section at the end", self.form!.isDisabled ? "Enable Form" : "Disable Form")
+        actionSheet.show(in: view)
     }
 
 //MARK: - UIActionSheetDelegate
 
 
-    override func actionSheet(actionSheet: UIActionSheet, clickedButtonAtIndex buttonIndex: Int) {
+    override func actionSheet(_ actionSheet: UIActionSheet, clickedButtonAt buttonIndex: Int) {
         if actionSheet.destructiveButtonIndex == buttonIndex {
-            if self.form.formSections.count > 0 {
+            if form.formSections.count > 0 {
                 // remove last section
-                self.form.removeFormSectionAtIndex(UInt(self.form.formSections.count - 1))
+                form.removeFormSection(at: UInt(form.formSections.count - 1))
             }
         }
-        else if actionSheet.buttonTitleAtIndex(buttonIndex) == "Add a section at the end" {
+        else if actionSheet.buttonTitle(at: buttonIndex) == "Add a section at the end" {
             // add a new section
-//            let dateString = NSDateFormatter.localizedStringFromDate(NSDate.new(), dateStyle: NSDateFormatterStyle.ShortStyle, timeStyle: NSDateFormatterStyle.ShortStyle)
-            let newSection  = XLFormSectionDescriptor.formSectionWithTitle("Section created at \(NSDateFormatter.localizedStringFromDate(NSDate.new(), dateStyle: NSDateFormatterStyle.ShortStyle, timeStyle: NSDateFormatterStyle.ShortStyle))", sectionOptions:XLFormSectionOptions.CanInsert | XLFormSectionOptions.CanDelete)
+//            let dateString = NSDateFormatter.localizedStringFromDate(NSDate(), dateStyle: NSDateFormatterStyle.ShortStyle, timeStyle: NSDateFormatterStyle.ShortStyle)
+            let newSection  = XLFormSectionDescriptor.formSection(withTitle: "Section created at \(DateFormatter.localizedString(from: Date(), dateStyle: DateFormatter.Style.short, timeStyle: DateFormatter.Style.short))", sectionOptions:XLFormSectionOptions.canInsert.union(.canDelete))
             newSection.multivaluedTag = "multivaluedPushSelector_\(self.form.formSections.count)"
             let newRow = XLFormRowDescriptor(tag: nil, rowType: XLFormRowDescriptorTypeSelectorPush, title: "Tap to select )..")
             newRow.selectorOptions = ["Option 1", "Option 2", "Option 3"]
             newSection.addFormRow(newRow)
-            self.form.addFormSection(newSection)
+            form.addFormSection(newSection)
         }
         else {
-            self.form.disabled = !self.form.disabled
-            self.tableView.endEditing(true)
-            self.tableView.reloadData()
+            form.isDisabled = !self.form.isDisabled
+            tableView.endEditing(true)
+            tableView.reloadData()
         }
     }
 }
@@ -127,13 +121,12 @@ class MultivaluedFormViewController : XLFormViewController {
 
 class MultivaluedOnlyReorderViewController : XLFormViewController {
     
-    required init(coder aDecoder: NSCoder) {
+    required init?(coder aDecoder: NSCoder) {
         super.init(coder: aDecoder)
         self.initializeForm()
     }
     
-    
-    override init(nibName nibNameOrNil: String?, bundle nibBundleOrNil: NSBundle?) {
+    override init(nibName nibNameOrNil: String?, bundle nibBundleOrNil: Bundle?) {
         super.init(nibName: nibNameOrNil, bundle: nibBundleOrNil)
         self.initializeForm()
     }
@@ -150,29 +143,31 @@ class MultivaluedOnlyReorderViewController : XLFormViewController {
         form = XLFormDescriptor(title: "Only Reorder Examples")
         
         // Multivalued Section with inline rows - section set up to support only reordering
-        section = XLFormSectionDescriptor.formSectionWithTitle("Reordering Inline Rows",
-                                                 sectionOptions:XLFormSectionOptions.CanReorder)
+        section = XLFormSectionDescriptor.formSection(withTitle: "Reordering Inline Rows",
+                                                 sectionOptions:.canReorder)
         section.footerTitle = "XLFormRowDescriptorTypeDateInline row type"
         form.addFormSection(section)
         var idx = 0
         for listItem in list {
-            let timeIntervalSinceNow : NSTimeInterval = NSTimeInterval(secondsPerDay * ++idx)
+            idx += 1
+            let timeIntervalSinceNow = TimeInterval(secondsPerDay * idx)
             row = XLFormRowDescriptor(tag: nil, rowType:XLFormRowDescriptorTypeDateInline, title: listItem)
-            row.value = NSDate(timeIntervalSinceNow:timeIntervalSinceNow)
+            row.value = Date(timeIntervalSinceNow:timeIntervalSinceNow)
             section.addFormRow(row)
         }
     
         // Multivalued Section with common rows - section set up to support only reordering
-        section = XLFormSectionDescriptor.formSectionWithTitle("Reordering Rows", sectionOptions:XLFormSectionOptions.CanReorder)
+        section = XLFormSectionDescriptor.formSection(withTitle: "Reordering Rows", sectionOptions:.canReorder)
         section.footerTitle = "XLFormRowDescriptorTypeInfo row type"
         form.addFormSection(section)
     
         
         idx = 0
         for listItem in list {
-            let timeIntervalSinceNow : NSTimeInterval = NSTimeInterval(secondsPerDay * ++idx)
+            idx += 1
+            let timeIntervalSinceNow  = TimeInterval(secondsPerDay * idx)
             row = XLFormRowDescriptor(tag: nil, rowType:XLFormRowDescriptorTypeInfo, title: listItem)
-            row.value = NSDateFormatter.localizedStringFromDate(NSDate(timeIntervalSinceNow:timeIntervalSinceNow), dateStyle: NSDateFormatterStyle.MediumStyle, timeStyle: NSDateFormatterStyle.NoStyle)
+            row.value = DateFormatter.localizedString(from: Date(timeIntervalSinceNow:timeIntervalSinceNow), dateStyle: .medium, timeStyle: .none)
             section.addFormRow(row)
         }
         
@@ -183,13 +178,13 @@ class MultivaluedOnlyReorderViewController : XLFormViewController {
 
 class MultivaluedOnlyInserViewController : XLFormViewController {
     
-    required init(coder aDecoder: NSCoder) {
+    required init?(coder aDecoder: NSCoder) {
         super.init(coder: aDecoder)
         self.initializeForm()
     }
     
     
-    override init(nibName nibNameOrNil: String?, bundle nibBundleOrNil: NSBundle?) {
+    override init(nibName nibNameOrNil: String?, bundle nibBundleOrNil: Bundle?) {
         super.init(nibName: nibNameOrNil, bundle: nibBundleOrNil)
         self.initializeForm()
     }
@@ -204,7 +199,7 @@ class MultivaluedOnlyInserViewController : XLFormViewController {
         
         form = XLFormDescriptor(title: "Multivalued Only Insert")
     
-        section = XLFormSectionDescriptor.formSectionWithTitle("XLFormSectionInsertModeButton", sectionOptions:XLFormSectionOptions.CanInsert, sectionInsertMode:XLFormSectionInsertMode.Button)
+        section = XLFormSectionDescriptor.formSection(withTitle: "XLFormSectionInsertModeButton", sectionOptions:.canInsert, sectionInsertMode:.button)
         form.addFormSection(section)
         
         
@@ -212,15 +207,15 @@ class MultivaluedOnlyInserViewController : XLFormViewController {
         row.cellConfig["textField.placeholder"] = "Add a new tag"
         section.multivaluedRowTemplate = row
         
-        section = XLFormSectionDescriptor.formSectionWithTitle("XLFormSectionInsertModeButton With Inline Cells", sectionOptions:XLFormSectionOptions.CanInsert, sectionInsertMode:XLFormSectionInsertMode.Button)
+        section = XLFormSectionDescriptor.formSection(withTitle: "XLFormSectionInsertModeButton With Inline Cells", sectionOptions:.canInsert, sectionInsertMode:.button)
         row = XLFormRowDescriptor(tag: nil, rowType:XLFormRowDescriptorTypeDateInline)
-        row.value = NSDate.new()
+        row.value = Date()
         row.title = "Date"
         section.multivaluedRowTemplate = row
         form.addFormSection(section)
 
-        section = XLFormSectionDescriptor.formSectionWithTitle("XLFormSectionInsertModeLastRow",
-                                                 sectionOptions:XLFormSectionOptions.CanInsert, sectionInsertMode:XLFormSectionInsertMode.LastRow)
+        section = XLFormSectionDescriptor.formSection(withTitle: "XLFormSectionInsertModeLastRow",
+                                                 sectionOptions:.canInsert, sectionInsertMode:.lastRow)
         form.addFormSection(section)
         for tag in nameList {
             // add a row to the section, the row will be used to crete new rows.
@@ -233,28 +228,26 @@ class MultivaluedOnlyInserViewController : XLFormViewController {
     }
 }
 
-
 class MultivaluedOnlyDeleteViewController : XLFormViewController {
     
-    required init(coder aDecoder: NSCoder) {
+    required init?(coder aDecoder: NSCoder) {
         super.init(coder: aDecoder)
-        self.initializeForm()
+        initializeForm()
     }
     
-    
-    override init(nibName nibNameOrNil: String?, bundle nibBundleOrNil: NSBundle?) {
+    override init(nibName nibNameOrNil: String?, bundle nibBundleOrNil: Bundle?) {
         super.init(nibName: nibNameOrNil, bundle: nibBundleOrNil)
-        self.initializeForm()
+        initializeForm()
     }
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        self.navigationItem.rightBarButtonItem = UIBarButtonItem(title: "Editing", style: UIBarButtonItemStyle.Plain, target: self, action: "toggleEditing:")
+        navigationItem.rightBarButtonItem = UIBarButtonItem(title: "Editing", style: .plain, target: self, action: #selector(MultivaluedOnlyDeleteViewController.toggleEditing(_:)))
     }
     
-    func toggleEditing(sender : UIBarButtonItem) {
-        self.tableView.setEditing(!self.tableView.editing, animated: true)
-        sender.title = self.tableView.editing ? "Editing" : "Not Editing"
+    func toggleEditing(_ sender : UIBarButtonItem) {
+        tableView.setEditing(!tableView.isEditing, animated: true)
+        sender.title = tableView.isEditing ? "Editing" : "Not Editing"
     }
     
     func initializeForm() {
@@ -267,7 +260,7 @@ class MultivaluedOnlyDeleteViewController : XLFormViewController {
         
         form = XLFormDescriptor(title: "Multivalued Only Delete")
         
-        section = XLFormSectionDescriptor.formSectionWithTitle("", sectionOptions:XLFormSectionOptions.CanDelete)
+        section = XLFormSectionDescriptor.formSection(withTitle: "", sectionOptions:.canDelete)
         section.footerTitle = "you can swipe to delete when table.editing = NO (Not Editing)"
         form.addFormSection(section)
       
@@ -280,7 +273,7 @@ class MultivaluedOnlyDeleteViewController : XLFormViewController {
         }
     
         // Multivalued Section with inline row.
-        section = XLFormSectionDescriptor.formSectionWithTitle("", sectionOptions:XLFormSectionOptions.CanDelete)
+        section = XLFormSectionDescriptor.formSection(withTitle: "", sectionOptions:.canDelete)
         section.footerTitle = "you can swipe to delete when table.editing = NO (Not Editing)"
         form.addFormSection(section)
         

@@ -28,19 +28,19 @@ import MapKit
 
 class CustomSelectorsFormViewController : XLFormViewController {
 
-    private enum Tags : String {
-        case SelectorMap = "selectorMap"
-        case SelectorMapPopover = "selectorMapPopover"
+    fileprivate struct Tags {
+        static let SelectorMap = "selectorMap"
+        static let SelectorMapPopover = "selectorMapPopover"
     }
 
-    override init(nibName nibNameOrNil: String?, bundle nibBundleOrNil: NSBundle?) {
+    override init(nibName nibNameOrNil: String?, bundle nibBundleOrNil: Bundle?) {
         super.init(nibName: nibNameOrNil, bundle: nibBundleOrNil)
-        self.initializeForm()
+        initializeForm()
     }
     
-    required init(coder aDecoder: NSCoder) {
+    required init?(coder aDecoder: NSCoder) {
         super.init(coder: aDecoder)
-        self.initializeForm()
+        initializeForm()
     }
     
     func initializeForm() {
@@ -51,20 +51,20 @@ class CustomSelectorsFormViewController : XLFormViewController {
         
         form = XLFormDescriptor(title: "Custom Selectors")
         
-        section = XLFormSectionDescriptor.formSectionWithTitle("TextField Types")
+        section = XLFormSectionDescriptor.formSection(withTitle: "TextField Types")
         section.footerTitle = "CustomSelectorsFormViewController.swift"
         form.addFormSection(section)
     
         // Selector Push
-        row = XLFormRowDescriptor(tag: Tags.SelectorMap.rawValue, rowType: XLFormRowDescriptorTypeSelectorPush, title: "Coordinate")
+        row = XLFormRowDescriptor(tag: Tags.SelectorMap, rowType: XLFormRowDescriptorTypeSelectorPush, title: "Coordinate")
         row.action.viewControllerClass = MapViewController.self
         row.valueTransformer = CLLocationValueTrasformer.self
         row.value = CLLocation(latitude: -33, longitude: -56)
         section.addFormRow(row)
         
-        if UIDevice.currentDevice().userInterfaceIdiom == UIUserInterfaceIdiom.Pad {
+        if UIDevice.current.userInterfaceIdiom == .pad {
             // Selector PopOver
-            row = XLFormRowDescriptor(tag: Tags.SelectorMapPopover.rawValue, rowType: XLFormRowDescriptorTypeSelectorPopover, title: "Coordinate PopOver")
+            row = XLFormRowDescriptor(tag: Tags.SelectorMapPopover, rowType: XLFormRowDescriptorTypeSelectorPopover, title: "Coordinate PopOver")
             row.action.viewControllerClass = MapViewController.self
             row.valueTransformer = CLLocationValueTrasformer.self
             row.value = CLLocation(latitude: -33, longitude: -56)

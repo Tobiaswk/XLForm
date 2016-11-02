@@ -25,18 +25,18 @@
 
 class UICustomizationFormViewController : XLFormViewController {
     
-    private enum Tags : String {
-        case Name = "Name"
-        case Button = "Button"
+    fileprivate struct Tags {
+        static let Name = "Name"
+        static let Button = "Button"
     }
     
     
-    override init(nibName nibNameOrNil: String?, bundle nibBundleOrNil: NSBundle?) {
+    override init(nibName nibNameOrNil: String?, bundle nibBundleOrNil: Bundle?) {
         super.init(nibName: nibNameOrNil, bundle: nibBundleOrNil)
         self.initializeForm()
     }
     
-    required init(coder aDecoder: NSCoder) {
+    required init?(coder aDecoder: NSCoder) {
         super.init(coder: aDecoder)
         self.initializeForm()
     }
@@ -53,17 +53,17 @@ class UICustomizationFormViewController : XLFormViewController {
         form.addFormSection(section)
     
         // Name
-        row = XLFormRowDescriptor(tag: Tags.Name.rawValue, rowType: XLFormRowDescriptorTypeText, title:"Name")
+        row = XLFormRowDescriptor(tag: Tags.Name, rowType: XLFormRowDescriptorTypeText, title:"Name")
         // change the background color
-        row.cellConfigAtConfigure["backgroundColor"] = UIColor.greenColor()
+        row.cellConfigAtConfigure["backgroundColor"] = UIColor.green
         // font
-        row.cellConfig["textLabel.font"] = UIFont.systemFontOfSize(30)
+        row.cellConfig["textLabel.font"] = UIFont.systemFont(ofSize: 30)
         // background color
-        row.cellConfig["textField.backgroundColor"] = UIColor.grayColor()
+        row.cellConfig["textField.backgroundColor"] = UIColor.gray
         // font
-        row.cellConfig["textField.font"] = UIFont.systemFontOfSize(25)
+        row.cellConfig["textField.font"] = UIFont.systemFont(ofSize: 25)
         // alignment
-        row.cellConfig["textField.textAlignment"] =  NSTextAlignment.Right.rawValue
+        row.cellConfig["textField.textAlignment"] =  NSTextAlignment.right.rawValue
         section.addFormRow(row)
         
         
@@ -72,24 +72,24 @@ class UICustomizationFormViewController : XLFormViewController {
         form.addFormSection(section)
         
         //Button
-        row = XLFormRowDescriptor(tag: Tags.Button.rawValue, rowType: XLFormRowDescriptorTypeButton, title:"Button")
-        row.cellConfigAtConfigure["backgroundColor"] = UIColor.purpleColor()
-        row.cellConfig["textLabel.color"] = UIColor.whiteColor()
-        row.cellConfig["textLabel.font"] = UIFont.systemFontOfSize(40)
+        row = XLFormRowDescriptor(tag: Tags.Button, rowType: XLFormRowDescriptorTypeButton, title:"Button")
+        row.cellConfigAtConfigure["backgroundColor"] = UIColor.purple
+        row.cellConfig["textLabel.color"] = UIColor.white
+        row.cellConfig["textLabel.font"] = UIFont.systemFont(ofSize: 40)
         section.addFormRow(row)
     
         self.form = form
     }
     
-    override func tableView(tableView: UITableView, heightForRowAtIndexPath indexPath: NSIndexPath) -> CGFloat {
+    override func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
         // change cell height of a particular cell
-        if self.form.formRowAtIndex(indexPath)?.tag == "Name" {
+        if form.formRow(atIndex: indexPath)?.tag == "Name" {
             return 60.0
         }
-        else if self.form.formRowAtIndex(indexPath)?.tag == "Button" {
+        else if form.formRow(atIndex: indexPath)?.tag == "Button" {
             return 100.0
         }
-        return super.tableView(tableView, heightForRowAtIndexPath: indexPath)
+        return super.tableView(tableView, heightForRowAt: indexPath)
     }
 }
 

@@ -27,30 +27,29 @@ import MapKit
 
 class OthersFormViewController : XLFormViewController {
 
-    private enum Tags : String {
-        case SwitchBool = "switchBool"
-        case SwitchCheck = "switchCheck"
-        case StepCounter = "stepCounter"
-        case Slider = "slider"
-        case SegmentedControl = "segmentedControl"
-        case Custom = "custom"
-        case Info = "info"
-        case Button = "button"
-        case ButtonLeftAligned = "buttonLeftAligned"
-        case ButtonWithSegueId = "buttonWithSegueId"
-        case ButtonWithSegueClass = "buttonWithSegueClass"
-        case ButtonWithNibName = "buttonWithNibName"
-        case ButtonWithStoryboardId = "buttonWithStoryboardId"
+    fileprivate struct Tags {
+        static let SwitchBool = "switchBool"
+        static let SwitchCheck = "switchCheck"
+        static let StepCounter = "stepCounter"
+        static let Slider = "slider"
+        static let SegmentedControl = "segmentedControl"
+        static let Custom = "custom"
+        static let Info = "info"
+        static let Button = "button"
+		static let Image = "image"
+        static let ButtonLeftAligned = "buttonLeftAligned"
+        static let ButtonWithSegueId = "buttonWithSegueId"
+        static let ButtonWithSegueClass = "buttonWithSegueClass"
+        static let ButtonWithNibName = "buttonWithNibName"
+        static let ButtonWithStoryboardId = "buttonWithStoryboardId"
     }
 
-    required init(coder aDecoder: NSCoder) {
+    required init?(coder aDecoder: NSCoder) {
         super.init(coder: aDecoder)
-        self.initializeForm()
     }
 
-    override init(nibName nibNameOrNil: String?, bundle nibBundleOrNil: NSBundle?) {
+    override init(nibName nibNameOrNil: String?, bundle nibBundleOrNil: Bundle?) {
         super.init(nibName: nibNameOrNil, bundle: nibBundleOrNil)
-        self.initializeForm()
     }
 
 
@@ -62,71 +61,81 @@ class OthersFormViewController : XLFormViewController {
         
         form = XLFormDescriptor(title: "Other Cells")
         
-        section = XLFormSectionDescriptor.formSectionWithTitle("Other Cells")
+        section = XLFormSectionDescriptor.formSection(withTitle: "Other Cells")
         section.footerTitle = "OthersFormViewController.swift"
         form.addFormSection(section)
         
         // Switch
-        section.addFormRow(XLFormRowDescriptor(tag: Tags.SwitchBool.rawValue, rowType: XLFormRowDescriptorTypeBooleanSwitch, title: "Switch"))
+        section.addFormRow(XLFormRowDescriptor(tag: Tags.SwitchBool, rowType: XLFormRowDescriptorTypeBooleanSwitch, title: "Switch"))
         
         // Check
-        section.addFormRow(XLFormRowDescriptor(tag: Tags.SwitchCheck.rawValue, rowType: XLFormRowDescriptorTypeBooleanCheck, title: "Check"))
+        section.addFormRow(XLFormRowDescriptor(tag: Tags.SwitchCheck, rowType: XLFormRowDescriptorTypeBooleanCheck, title: "Check"))
         
         // Step counter
-        section.addFormRow(XLFormRowDescriptor(tag: Tags.StepCounter.rawValue, rowType: XLFormRowDescriptorTypeStepCounter, title: "Step counter"))
+        section.addFormRow(XLFormRowDescriptor(tag: Tags.StepCounter, rowType: XLFormRowDescriptorTypeStepCounter, title: "Step counter"))
         
         // Segmented Control
-        row = XLFormRowDescriptor(tag: Tags.SegmentedControl.rawValue, rowType: XLFormRowDescriptorTypeSelectorSegmentedControl, title: "Fruits")
+        row = XLFormRowDescriptor(tag: Tags.SegmentedControl, rowType: XLFormRowDescriptorTypeSelectorSegmentedControl, title: "Fruits")
         row.selectorOptions = ["Apple", "Orange", "Pear"]
         row.value = "Pear"
         section.addFormRow(row)
+
+        row = XLFormRowDescriptor(tag: Tags.SegmentedControl, rowType: XLFormRowDescriptorTypeSegmentedInline, title: "Fruits Inline")
+        row.selectorOptions = ["Apple", "Orange", "Pear"]
+        row.value = "Pear"
+        section.addFormRow(row)
+
         
         
         // Slider
-        row = XLFormRowDescriptor(tag: Tags.Slider.rawValue, rowType: XLFormRowDescriptorTypeSlider, title: "Slider")
+        row = XLFormRowDescriptor(tag: Tags.Slider, rowType: XLFormRowDescriptorTypeSlider, title: "Slider")
         row.value = 30
         row.cellConfigAtConfigure["slider.maximumValue"] = 100
         row.cellConfigAtConfigure["slider.minimumValue"] = 10
         row.cellConfigAtConfigure["steps"] = 4
         section.addFormRow(row)
-        
+		
+		// Image
+		row = XLFormRowDescriptor(tag: Tags.Image, rowType: XLFormRowDescriptorTypeImage, title: "Image")
+		row.value = UIImage(named: "default_avatar")
+		section.addFormRow(row)
 
         // Info cell
-        row = XLFormRowDescriptor(tag: Tags.Info.rawValue, rowType: XLFormRowDescriptorTypeInfo)
+        row = XLFormRowDescriptor(tag: Tags.Info, rowType: XLFormRowDescriptorTypeInfo)
         row.title = "Version"
-        row.value = NSBundle.mainBundle().infoDictionary!["CFBundleShortVersionString"]
+        row.value = Bundle.main.infoDictionary!["CFBundleShortVersionString"]
         section.addFormRow(row)
         
         
-        section = XLFormSectionDescriptor.formSectionWithTitle("Buttons")
+        section = XLFormSectionDescriptor.formSection(withTitle: "Buttons")
         section.footerTitle = "Blue buttons will show a message when Switch is ON"
         form.addFormSection(section)
     
         // Button
-        row = XLFormRowDescriptor(tag: Tags.Button.rawValue, rowType: XLFormRowDescriptorTypeButton, title: "Button")
+        row = XLFormRowDescriptor(tag: Tags.Button, rowType: XLFormRowDescriptorTypeButton, title: "Button")
         row.cellConfig["textLabel.textColor"] = UIColor(red: 0.0, green: 122.0/255.0, blue: 1.0, alpha: 1.0)
-        row.action.formSelector = "didTouchButton:"
+        row.action.formSelector = #selector(OthersFormViewController.didTouchButton(_:))
         section.addFormRow(row)
         
         
         // Left Button
-        row = XLFormRowDescriptor(tag: Tags.ButtonLeftAligned.rawValue, rowType: XLFormRowDescriptorTypeButton, title: "Button with Block")
+        row = XLFormRowDescriptor(tag: Tags.ButtonLeftAligned, rowType: XLFormRowDescriptorTypeButton, title: "Button with Block")
         row.cellConfig["textLabel.textColor"] = UIColor(red: 0.0, green: 122.0/255.0, blue: 1.0, alpha: 1.0)
-        row.cellConfig["textLabel.textAlignment"] = NSTextAlignment.Left.rawValue
-        row.cellConfig["accessoryType"] = UITableViewCellAccessoryType.DisclosureIndicator.rawValue
-        row.action.formBlock = { (sender: XLFormRowDescriptor!) -> Void in
-            let switchRow = sender.sectionDescriptor.formDescriptor!.formRowWithTag(Tags.SwitchBool.rawValue)!
-            if switchRow.value != nil && switchRow.value!.boolValue == true {
+        row.cellConfig["textLabel.textAlignment"] = NSTextAlignment.left.rawValue
+        row.cellConfig["accessoryType"] = UITableViewCellAccessoryType.disclosureIndicator.rawValue
+        row.action.formBlock = { [weak self] (sender: XLFormRowDescriptor!) -> Void in
+            let switchRow = sender.sectionDescriptor.formDescriptor!.formRow(withTag: Tags.SwitchBool)!
+            if let value = switchRow.value , (value as AnyObject).boolValue == true {
                 let alertView = UIAlertView(title: "Switch is ON", message: "Button has checked the switch value...", delegate: self, cancelButtonTitle: "OK")
                 alertView.show()
             }
-            self.deselectFormRow(sender)
+            self?.deselectFormRow(sender)
         }
         section.addFormRow(row)
         
     
         // Another Left Button with segue
-        row = XLFormRowDescriptor(tag: Tags.ButtonWithSegueClass.rawValue, rowType: XLFormRowDescriptorTypeButton, title: "Button with Segue Class")
+        row = XLFormRowDescriptor(tag: Tags.ButtonWithSegueClass, rowType: XLFormRowDescriptorTypeButton, title: "Button with Segue Class")
         row.action.formSegueClass = NSClassFromString("UIStoryboardPushSegue")
         row.action.viewControllerClass = MapViewController.self
         row.value = CLLocation(latitude: -33.0, longitude: -56.0)
@@ -134,20 +143,20 @@ class OthersFormViewController : XLFormViewController {
         
         
         // Button with SegueId
-        row = XLFormRowDescriptor(tag: Tags.ButtonWithSegueId.rawValue, rowType: XLFormRowDescriptorTypeButton, title: "Button with Segue Idenfifier")
-        row.action.formSegueIdenfifier = "MapViewControllerSegue"
+        row = XLFormRowDescriptor(tag: Tags.ButtonWithSegueId, rowType: XLFormRowDescriptorTypeButton, title: "Button with Segue Idenfifier")
+        row.action.formSegueIdentifier = "MapViewControllerSegue"
         row.value = CLLocation(latitude: -33, longitude: -56)
         section.addFormRow(row)
         
         
         // Another Button using StoryboardId
-        row = XLFormRowDescriptor(tag: Tags.ButtonWithStoryboardId.rawValue, rowType: XLFormRowDescriptorTypeButton, title: "Button with StoryboardId")
+        row = XLFormRowDescriptor(tag: Tags.ButtonWithStoryboardId, rowType: XLFormRowDescriptorTypeButton, title: "Button with StoryboardId")
         row.action.viewControllerStoryboardId = "MapViewController"
         row.value = CLLocation(latitude: -33, longitude: -56)
         section.addFormRow(row)
         
         // Button using NibName
-        row = XLFormRowDescriptor(tag: Tags.ButtonWithNibName.rawValue, rowType: XLFormRowDescriptorTypeButton, title: "Button with NibName")
+        row = XLFormRowDescriptor(tag: Tags.ButtonWithNibName, rowType: XLFormRowDescriptorTypeButton, title: "Button with NibName")
         row.action.viewControllerNibName = "MapViewController"
         row.value = CLLocation(latitude: -33, longitude: -56)
         section.addFormRow(row)
@@ -155,9 +164,8 @@ class OthersFormViewController : XLFormViewController {
         self.form = form
     }
     
-    
-    func didTouchButton(sender: XLFormRowDescriptor) {
-        if sender.sectionDescriptor.formDescriptor.formRowWithTag(Tags.SwitchBool.rawValue)?.value?.boolValue == true{
+    func didTouchButton(_ sender: XLFormRowDescriptor) {
+        if (sender.sectionDescriptor.formDescriptor.formRow(withTag: Tags.SwitchBool)?.value as AnyObject).boolValue == true{
             let alertView = UIAlertView(title: "Switch is ON", message: "Button has checked the switch value...", delegate: self, cancelButtonTitle: "OK")
             alertView.show()
         }
@@ -166,18 +174,20 @@ class OthersFormViewController : XLFormViewController {
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        let barButton = UIBarButtonItem(title: "Disable", style: UIBarButtonItemStyle.Plain, target: self, action: "disableEnable:")
+
+        initializeForm()
+
+        let barButton = UIBarButtonItem(title: "Disable", style: .plain, target: self, action: #selector(OthersFormViewController.disableEnable(_:)))
         barButton.possibleTitles = Set(["Disable", "Enable"])
-        self.navigationItem.rightBarButtonItem = barButton
+        navigationItem.rightBarButtonItem = barButton
     }
     
     
-    func disableEnable(button : UIBarButtonItem)
-    {
-        self.form.disabled = !self.form.disabled
-        button.title = self.form.disabled ? "Enable" : "Disable"
-        self.tableView.endEditing(true)
-        self.tableView.reloadData()
+    func disableEnable(_ button : UIBarButtonItem) {
+        form.isDisabled = !form.isDisabled
+        button.title = form.isDisabled ? "Enable" : "Disable"
+        tableView.endEditing(true)
+        tableView.reloadData()
     }
 
 }
