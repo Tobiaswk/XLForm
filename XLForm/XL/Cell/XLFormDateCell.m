@@ -217,6 +217,9 @@
     if (_datePicker) return _datePicker;
     _datePicker = [[UIDatePicker alloc] init];
     [self setModeToDatePicker:_datePicker];
+    if (@available(iOS 13.4, *)) {
+        [_datePicker setPreferredDatePickerStyle:UIDatePickerStyleWheels];
+    }
     [_datePicker addTarget:self action:@selector(datePickerValueChanged:) forControlEvents:UIControlEventValueChanged];
     return _datePicker;
 }
